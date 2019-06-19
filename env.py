@@ -146,11 +146,11 @@ class chess_env:
     def pawn_actions(self, pawn):
 
         row, col = self.piece_locations[pawn]
-        not_left_last = col != 0 and not_last
-        not_right_last = col != 7 and not_last
 
         if pawn[0] == 'P':
             not_last = row != 0
+            not_left_last = col != 0 and not_last
+            not_right_last = col != 7 and not_last
             
             if row == 6 and self.board[5][col] == ' ' and self.board[4][col] == ' ':
                 # Starting Double Move Forward
@@ -174,6 +174,8 @@ class chess_env:
 
         elif pawn[0] == 'p':
             not_last = row != 7
+            not_left_last = col != 0 and not_last
+            not_right_last = col != 7 and not_last
             
             if row == 1 and self.board[2][col] == ' ' and self.board[3][col] == ' ':
                 # Starting Double Move Forward
@@ -230,10 +232,12 @@ class chess_env:
             (row + 1, col + 2), (row + 2, col + 1)
         ]
 
-        for tile in jumps:
-            if tile[0] >= 0 and tile[1] >= 0 and tile[0] <= 7 and tile[1] <= 7:
-                # Possible jump
-                pass
+        for r, c in jumps:
+            if r >= 0 and c >= 0 and r <= 7 and c <= 7:
+                tile = self.board[r][c]
+                if tile == ' ' or self.can_capture(knight, tile):
+                    # Possible move
+                    pass
 
 
     def bishop_actions(self, bishop):
@@ -254,8 +258,6 @@ class chess_env:
 
     def king_actions(self, king):
 
-        """ CHECK THREATS FIRST """
-
         row, col = self.piece_locations[king]
 
         moves = [
@@ -268,7 +270,7 @@ class chess_env:
         for r, c in moves:
             if r >= 0 and c >= 0 and r <= 7 and c <= 7:
                 tile = self.board[r][c]
-                if num_attacking((r,c)) == 0 and (tile == ' ' or self.can_capture(king, tile)):
+                if self.num_attacking((r,c)) == 0 and (tile == ' ' or self.can_capture(king, tile)):
                     # Possible move
                     pass
 
