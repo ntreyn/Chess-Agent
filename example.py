@@ -6,7 +6,7 @@ import time
 
 def main():
     env = chess_env()
-    env.reset()
+    env.render()
 
 
 if __name__ == "__main__":
