@@ -135,6 +135,33 @@ class chess_env:
     def can_capture(self, p1, p2):
         return p1.islower() != p2.islower()
 
+    def in_bounds(self, r, c):
+        if r > 7 or r < 0 or c > 7 or c < 0:
+            return False
+        else:
+            return True
+
+    def step_checker(self, row_offset, col_offset, tile, piece):
+        r, c = tile
+
+        while True:
+            r += row_offset
+            c += col_offset
+
+            if not self.in_bounds(r, c):
+                break
+
+            if self.board[r][c] == ' ':
+                # Open square, possible move
+                pass
+            elif self.can_capture(piece, self.board[r][c]):
+                # Enemy piece, possible move
+                break
+            else:
+                # Friendly piece, impossible move
+                break
+
+
     def num_attacking(self, tile):
         # Number of enemy pieces attacking square
         pass
@@ -204,13 +231,17 @@ class chess_env:
 
     def rook_actions(self, rook):
 
-        # Lateral Slide
+        rook_tile = self.piece_locations[rook]
+        offsets = [
+            (1, 0), (0, 1), (-1, 0), (0, -1)
+        ]
 
-        # Longitudinal Slide
+        for r, c in offsets:
+            self.step_checker(r, c, rook_tile, rook)
 
         # Castling
+        # TODO
 
-        pass
 
     def knight_actions(self, knight):
         """
@@ -233,7 +264,7 @@ class chess_env:
         ]
 
         for r, c in jumps:
-            if r >= 0 and c >= 0 and r <= 7 and c <= 7:
+            if self.in_bounds(r, c):
                 tile = self.board[r][c]
                 if tile == ' ' or self.can_capture(knight, tile):
                     # Possible move
@@ -242,19 +273,24 @@ class chess_env:
 
     def bishop_actions(self, bishop):
 
-        # 2 Diagonal Slides
+        bish_tile = self.piece_locations[bishop]
+        offsets = [
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
+        ]
 
-        pass
+        for r, c in offsets:
+            self.step_checker(r, c, bish_tile, bishop)
 
     def queen_actions(self, queen):
 
-        # 2 Diagonal Slides
+        queen_tile = self.piece_locations[queen]
+        offsets = [
+            (1, 0), (0, 1), (-1, 0), (0, -1),
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
+        ]
 
-        # Lateral Slide
-
-        # Longitudinal Slide
-
-        pass
+        for r, c in offsets:
+            self.step_checker(r, c, queen_tile, queen)
 
     def king_actions(self, king):
 
@@ -268,7 +304,7 @@ class chess_env:
         ]
 
         for r, c in moves:
-            if r >= 0 and c >= 0 and r <= 7 and c <= 7:
+            if self.in_bounds(r, c):
                 tile = self.board[r][c]
                 if self.num_attacking((r,c)) == 0 and (tile == ' ' or self.can_capture(king, tile)):
                     # Possible move
