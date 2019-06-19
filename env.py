@@ -52,6 +52,8 @@ class chess_env:
         self.white_lost = []
         self.kings_moved = { 'W': False, 'B': False }
         self.rooks_moved = { 'W': [False, False], 'B': [False, False] }
+        self.last_move = (0, (-1, -1))
+        self.last_move_pawn_jump = False
 
     def step(self, action):
         """
@@ -231,8 +233,6 @@ class chess_env:
         
         return num_attackers
 
-        
-
     def num_defending(self, tile):
         # Number of friendly pieces defending square
         pass
@@ -319,10 +319,12 @@ class chess_env:
             if not_right_last and self.can_capture(pawn, self.board[row - 1][col + 1]):
                 # Diagonal capture right
                 moves.append((row - 1, col + 1))
-            
-            # En Passant
-            # TODO
-
+            if self.last_move_pawn_jump:
+                lr, lc = self.last_move[1]
+                if lr == row:
+                    if lc + 1 == col or lc - 1 == col:
+                        # En Passant
+                        moves.append((row - 1, lc))
             if row == 1 and self.board[row - 1][col] == 0:
                 # Last Row Promotion
                 # TODO
@@ -345,10 +347,12 @@ class chess_env:
             if not_right_last and self.can_capture(pawn, self.board[row + 1][col + 1]):
                 # Diagonal capture right
                 moves.append((row + 1, col + 1))
-            
-            # En Passant
-            # TODO
-
+            if self.last_move_pawn_jump:
+                lr, lc = self.last_move[1]
+                if lr == row:
+                    if lc + 1 == col or lc - 1 == col:
+                        # En Passant
+                        moves.append((row + 1, lc))
             if row == 6 and self.board[row + 1][col] == 0:
                 # Last Row Promotion
                 # TODO
