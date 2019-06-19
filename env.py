@@ -1,4 +1,5 @@
 import numpy as np 
+import copy
 
 class chess_env:
 
@@ -62,13 +63,53 @@ class chess_env:
         tile : letter+number -> (row, col)
         """
         piece = self.correct_piece(action[0])
+        piece = self.pieces_to_ids[piece]
         tile = self.tile_to_coord(action[1])
-
-        print(self.get_moves())
-
+        self.execute_move(piece, tile)
 
 
 
+
+
+
+
+        # End of step
+        if self.player == 'W':
+            self.player = 'B'
+        else:
+            self.player = 'W'
+
+        return self.done
+
+    def execute_move(self, piece, tile):
+        r, c = tile
+
+        if self.board[r][c] == 0:
+            or_r, or_c = self.piece_locations[piece]
+            self.board[or_r][or_c] = 0
+            self.piece_locations[piece] = tile
+            self.board[r][c] = piece
+        
+        else:
+            or_r, or_c = self.piece_locations[piece]
+            self.board[or_r][or_c] = 0
+            opp_piece = self.board[r][c]
+            self.piece_locations[opp_piece] = (-1, -1)
+
+            if opp_piece > 0:
+                self.white_remaining.remove(opp_piece)
+                self.white_lost.append(opp_piece)
+            else:
+                print(piece)
+                print(tile)
+                self.black_remaining.remove(opp_piece)
+                self.black_lost.append(opp_piece)
+
+            self.piece_locations[piece] = tile
+            self.board[r][c] = piece
+
+
+        self.last_move = piece, tile
 
 
     def render(self):
@@ -76,6 +117,22 @@ class chess_env:
         col_ids = ['A','B','C','D','E','F','G','H']
         row_ind = 0
         boundary = '  ' + '-' * 25
+
+        print()
+        print("White taken: ", end='')
+        for p in self.white_lost:
+            piece = self.ids_to_pieces[p]
+            img = self.piece_unicode[piece[0]]
+            print(img, end=' ')
+
+        
+        print()
+        print("Black taken: ", end='')
+        for p in self.black_lost:
+            piece = self.ids_to_pieces[p]
+            img = self.piece_unicode[piece[0]]
+            print(img, end=' ')
+
         print()
         print(boundary)
         
@@ -117,7 +174,7 @@ class chess_env:
 
         for r, row in enumerate(self.board):
             for c, tile in enumerate(row):
-                if tile != ' ':
+                if tile != 0:
                     self.piece_locations[tile] = (r, c)
 
     def correct_piece(self, piece):
@@ -244,7 +301,7 @@ class chess_env:
         for p, c in raw_moves:
             tile = self.coord_to_tile(c[0], c[1])
             piece = self.ids_to_pieces[p]
-            moves.append((piece, tile))
+            moves.append((piece.upper(), tile))
         
         return moves
 
@@ -294,8 +351,51 @@ class chess_env:
             else:
                 # Should never happen
                 pass
+
+        if self.player == 'B':
+            king = -5
+        else:
+            king = 5
+
+        king_tile = self.piece_locations[king]
+        check_count = self.num_attacking(king_tile)
+
+        if check_count > 0:
+            valid_moves = self.check_moves(moves, king)
+            return valid_moves
     
         return moves
+
+    def check_moves(self, moves, king):
+        temp_board = self.board
+        temp_piece_locations = self.piece_locations
+        temp_white_remaining = self.white_remaining
+        temp_white_lost = self.white_lost
+        temp_black_remaining = self.black_remaining
+        temp_black_lost = self.black_lost
+        temp_last_move = self.last_move
+
+        valid_moves = []
+
+        for piece, tile in moves:
+            self.execute_move(piece, tile)
+            king_tile = self.piece_locations[king]
+            check_count = self.num_attacking(king_tile)
+
+            if check_count == 0:
+                print(piece)
+                print(tile)
+                valid_moves.append((piece, tile))
+
+            self.board = temp_board
+            self.piece_locations = temp_piece_locations
+            self.white_remaining = temp_white_remaining
+            self.white_lost = temp_white_lost
+            self.black_remaining = temp_black_remaining
+            self.black_lost = temp_black_lost
+            self.last_move = temp_last_move
+        
+        return valid_moves
 
     def pawn_actions(self, pawn):
 
