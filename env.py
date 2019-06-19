@@ -24,10 +24,10 @@ class chess_env:
 
     def __init__(self):
         self.state_size = 13 ** 64
-        self.player = 'W'
         self.state_count = 0
         self.state_space = {}
         self.reset()
+        self.set_piece_locations()
     
     def reset(self):
         self.board = [
@@ -41,10 +41,22 @@ class chess_env:
             [1, 2, 3, 4, 5, 6, 7, 8]
         ]
         self.done = False
-        pass 
+        self.player = 'W'
 
-    def step(self):
-        pass
+
+    def step(self, action):
+        """
+        action : (piece, tile)
+        piece : letter+number(optional)
+        tile : letter+number -> (row, col)
+        """
+        piece = self.translate_piece(action[0])
+        tile = self.translate_tile(action[1])
+
+
+
+
+
 
     def render(self):
         row_ids = [8,7,6,5,4,3,2,1]
@@ -86,3 +98,100 @@ class chess_env:
             self.state_space[state] = self.state_count
             self.state_count += 1
             return self.state_space[state]
+
+    def set_piece_locations(self):
+        self.piece_locations = {}
+
+        for r, row in enumerate(self.board):
+            for c, tile in enumerate(row):
+                if tile != ' ':
+                    self.piece_locations = (r, c)
+
+
+    def translate_piece(self, piece):
+        if self.player == 'W':
+            return piece.upper()
+        else:
+            return piece.lower()
+
+    def translate_tile(self, tile):
+        letter = tile[0].upper()
+        number = int(tile[1])
+
+        letter_to_col = {
+            'A': 0,
+            'B': 1,
+            'C': 2,
+            'D': 3,
+            'E': 4,
+            'F': 5,
+            'G': 6,
+            'H': 7
+        }
+
+        row = 8 - number
+        col = letter_to_col[letter]
+
+        return (row, col)
+
+
+
+    def pawn_actions(self, pawn):
+
+        # Starting Double Move Forward
+
+        # Single Move Forward
+
+        # Diagonal Capture
+
+        # En Passant
+
+        # Last Row Promotion
+
+        pass
+    
+    def rook_actions(self, rook):
+
+        # Lateral Slide
+
+        # Longitudinal Slide
+
+        # Castling
+
+        pass
+
+    def knight_actions(self, knight):
+
+        # 8 'L' Jumps
+
+        pass
+
+    def bishop_actions(self, bishop):
+
+        # 2 Diagonal Slides
+
+        pass
+
+    def queen_actions(self, queen):
+
+        # 2 Diagonal Slides
+
+        # Lateral Slide
+
+        # Longitudinal Slide
+
+        pass
+
+    def king_actions(self, king):
+
+        """ CHECK THREATS FIRST """
+
+        # Lateral Move
+
+        # Longitudinal Move
+
+        # 2 Diagonal Moves
+
+        pass
+        
+
