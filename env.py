@@ -17,8 +17,12 @@ class chess_env:
         'P1': 9, 'P2': 10, 'P3': 11, 'P4': 12, 'P5': 13, 'P6': 14, 'P7': 15, 'P8': 16, 
         'r1': -1, 'n1': -2, 'b1': -3, 'q': -4, 'k': -5, 'b2': -6, 'n2': -7, 'r2': -8,
         'p1': -9, 'p2': -10, 'p3': -11, 'p4': -12, 'p5': -13, 'p6': -14, 'p7': -15, 'p8': -16, 
-        ' ': 0
+        ' ': 0, 'C': 17, 'c': -17
     }
+
+    """
+    (+/-) 17 : Castle
+    """
 
     ids_to_pieces = {v: k for k, v in pieces_to_ids.items()}
 
@@ -46,6 +50,8 @@ class chess_env:
         self.black_lost = []
         self.white_remaining = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
         self.white_lost = []
+        self.kings_moved = { 'W': False, 'B': False }
+        self.rooks_moved = { 'W': [False, False], 'B': [False, False] }
 
     def step(self, action):
         """
@@ -208,9 +214,17 @@ class chess_env:
             pieces = self.black_remaining
 
         moves = []
+        castle_moves = self.castling_actions()
+        for m in castle_moves:
+            r, _ = m
+            if r == 0:
+                mult = -1
+            else:
+                mult = 1
+            p = 17 * mult
+            moves.append((p, m))
 
         for p in pieces:
-            abs_p = abs(p)
             if abs_p >= 9:
                 pawn_moves = self.pawn_actions(p)
                 for m in pawn_moves:
@@ -317,9 +331,6 @@ class chess_env:
             for s in steps:
                 moves.append(s)
 
-        # Castling
-        # TODO
-
         return moves
 
     def knight_actions(self, knight):
@@ -400,5 +411,49 @@ class chess_env:
         
         return moves
 
+    def castling_actions(self):
+        moves = []
+        if self.player == 'W':
+            row = 7
+        else:
+            row = 0
+
+        if not self.kings_moved[self.player]:
+            if self.num_attacking((row, 4)) > 0:
+                return moves
+
+            if not self.rooks_moved[self.player][0]:
+                # Queen side
+                cols = [1, 2, 3]
+                good = True
+
+                for c in cols:
+                    if c != 1:
+                        # Check attacked
+                        if self.num_attacking((row, c)) > 0:
+                            good = False
+                    # Check filled
+                    if self.board[row][c] != 0:
+                        good = False
         
+                if good:
+                    moves.append((row, 2))
+
+            if not self.rooks_moved[self.player][1]:
+                # King side
+                cols = [5, 6]
+                good = True
+
+                for c in cols:
+                    # Check attacked
+                    if self.num_attacking((row, c)) > 0:
+                        good = False
+                    # Check filled
+                    if self.board[row][c] != 0:
+                        good = False
+
+                if good:
+                    moves.append((row, 6))
+
+        return moves
 
