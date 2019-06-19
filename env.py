@@ -43,7 +43,6 @@ class chess_env:
         self.done = False
         self.player = 'W'
 
-
     def step(self, action):
         """
         action : (piece, tile)
@@ -107,7 +106,6 @@ class chess_env:
                 if tile != ' ':
                     self.piece_locations[tile] = (r, c)
 
-
     def translate_piece(self, piece):
         if self.player == 'W':
             return piece.upper()
@@ -136,6 +134,14 @@ class chess_env:
 
     def can_capture(self, p1, p2):
         return p1.islower() != p2.islower()
+
+    def num_attacking(self, tile):
+        # Number of enemy pieces attacking square
+        pass
+
+    def num_defending(self, tile):
+        # Number of friendly pieces defending square
+        pass
 
     def pawn_actions(self, pawn):
 
@@ -191,7 +197,7 @@ class chess_env:
             # Should never happen
             pass
 
-    
+
     def rook_actions(self, rook):
 
         # Lateral Slide
@@ -203,10 +209,30 @@ class chess_env:
         pass
 
     def knight_actions(self, knight):
+        """
+            1       8
+        2               7
+                N       
+        3               6
+            4       5   
+        """
 
         # 8 'L' Jumps
 
-        pass
+        row, col = self.piece_locations[knight]
+
+        jumps = [
+            (row - 1, col - 2), (row - 2, col - 1),
+            (row - 1, col + 2), (row - 2, col + 1),
+            (row + 1, col - 2), (row + 2, col - 1),
+            (row + 1, col + 2), (row + 2, col + 1)
+        ]
+
+        for tile in jumps:
+            if tile[0] >= 0 and tile[1] >= 0 and tile[0] <= 7 and tile[1] <= 7:
+                # Possible jump
+                pass
+
 
     def bishop_actions(self, bishop):
 
@@ -228,12 +254,21 @@ class chess_env:
 
         """ CHECK THREATS FIRST """
 
-        # Lateral Move
+        row, col = self.piece_locations[king]
 
-        # Longitudinal Move
+        moves = [
+            (row - 1, col - 1), (row + 1, col + 1),
+            (row - 1, col + 1), (row + 1, col - 1),
+            (row + 1, col), (row - 1, col),
+            (row, col + 1), (row, col - 1)
+        ]
 
-        # 2 Diagonal Moves
+        for r, c in moves:
+            if r >= 0 and c >= 0 and r <= 7 and c <= 7:
+                tile = self.board[r][c]
+                if num_attacking((r,c)) == 0 and (tile == ' ' or self.can_capture(king, tile)):
+                    # Possible move
+                    pass
 
-        pass
         
 
