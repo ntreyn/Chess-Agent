@@ -170,6 +170,7 @@ class chess_env:
 
             if row == 1 and self.board[row - 1] == ' ':
                 # Last Row Promotion
+                pass
 
         elif pawn[0] == 'p':
             not_last = row != 7
@@ -192,6 +193,7 @@ class chess_env:
 
             if row == 6 and self.board[row + 1] == ' ':
                 # Last Row Promotion
+                pass
         
         else:
             # Should never happen
