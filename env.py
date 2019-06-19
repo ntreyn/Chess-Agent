@@ -189,8 +189,49 @@ class chess_env:
         return moves
 
     def num_attacking(self, tile):
-        # Number of enemy pieces attacking square
-        pass
+        if self.player == 'W':
+            pieces = self.black_remaining
+        else:
+            pieces = self.white_remaining
+
+        moves = []
+
+        for p in pieces:
+            abs_p = abs(p)
+            if abs_p >= 9:
+                pawn_moves = self.pawn_actions(p)
+                for m in pawn_moves:
+                    moves.append(m)
+            elif abs_p == 1 or abs_p == 8:
+                rook_moves = self.rook_actions(p)
+                for m in rook_moves:
+                    moves.append(m)
+            elif abs_p == 2 or abs_p == 7:
+                knight_moves = self.knight_actions(p)
+                for m in knight_moves:
+                    moves.append(m)
+            elif abs_p == 3 or abs_p == 6:
+                bishop_moves = self.bishop_actions(p)
+                for m in bishop_moves:
+                    moves.append(m)
+            elif abs_p == 4:
+                queen_moves = self.queen_actions(p)
+                for m in queen_moves:
+                    moves.append(m)
+            elif abs_p == 5:
+                king_moves = self.king_attacking(p)
+                for m in king_moves:
+                    moves.append(m)
+        
+        num_attackers = 0
+
+        for m in moves:
+            if m == tile:
+                num_attackers += 1
+        
+        return num_attackers
+
+        
 
     def num_defending(self, tile):
         # Number of friendly pieces defending square
@@ -225,6 +266,7 @@ class chess_env:
             moves.append((p, m))
 
         for p in pieces:
+            abs_p = abs(p)
             if abs_p >= 9:
                 pawn_moves = self.pawn_actions(p)
                 for m in pawn_moves:
@@ -408,6 +450,22 @@ class chess_env:
                 if self.num_attacking((r,c)) == 0 and (tile == 0 or self.can_capture(king, tile)):
                     # Possible move
                     moves.append((r, c))
+        
+        return moves
+
+    def king_attacking(self, king):
+        row, col = self.piece_locations[king]
+        spaces = [
+            (row - 1, col - 1), (row + 1, col + 1),
+            (row - 1, col + 1), (row + 1, col - 1),
+            (row + 1, col), (row - 1, col),
+            (row, col + 1), (row, col - 1)
+        ]
+        moves = []
+
+        for r, c in spaces:
+            if self.in_bounds(r, c):
+                moves.append((r, c))
         
         return moves
 
