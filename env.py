@@ -105,7 +105,7 @@ class chess_env:
         for r, row in enumerate(self.board):
             for c, tile in enumerate(row):
                 if tile != ' ':
-                    self.piece_locations = (r, c)
+                    self.piece_locations[tile] = (r, c)
 
 
     def translate_piece(self, piece):
@@ -134,21 +134,63 @@ class chess_env:
 
         return (row, col)
 
-
+    def can_capture(self, p1, p2):
+        return p1.islower() != p2.islower()
 
     def pawn_actions(self, pawn):
 
-        # Starting Double Move Forward
+        row, col = self.piece_locations[pawn]
+        not_left_last = col != 0 and not_last
+        not_right_last = col != 7 and not_last
 
-        # Single Move Forward
+        if pawn[0] == 'P':
+            not_last = row != 0
+            
+            if row == 6 and self.board[5][col] == ' ' and self.board[4][col] == ' ':
+                # Starting Double Move Forward
+                pass
+            if not_last and self.board[row - 1] == ' ':
+                # Single Move Forward
+                pass
+            if not_left_last and self.can_capture(pawn, self.board[row - 1][col - 1]):
+                # Diagonal capture left
+                pass
+            if not_right_last and self.can_capture(pawn, self.board[row - 1][col + 1]):
+                # Diagonal capture right
+                pass
+            
+            # En Passant
+            # TODO
 
-        # Diagonal Capture
+            if row == 1 and self.board[row - 1] == ' ':
+                # Last Row Promotion
 
-        # En Passant
+        elif pawn[0] == 'p':
+            not_last = row != 7
+            
+            if row == 1 and self.board[2][col] == ' ' and self.board[3][col] == ' ':
+                # Starting Double Move Forward
+                pass
+            if not_last and self.board[row + 1] == ' ':
+                # Single Move Forward
+                pass
+            if not_left_last and self.can_capture(pawn, self.board[row + 1][col - 1]):
+                # Diagonal capture left
+                pass
+            if not_right_last and self.can_capture(pawn, self.board[row + 1][col + 1]):
+                # Diagonal capture right
+                pass
+            
+            # En Passant
+            # TODO
 
-        # Last Row Promotion
+            if row == 6 and self.board[row + 1] == ' ':
+                # Last Row Promotion
+        
+        else:
+            # Should never happen
+            pass
 
-        pass
     
     def rook_actions(self, rook):
 
