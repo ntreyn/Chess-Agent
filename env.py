@@ -109,7 +109,6 @@ class chess_env:
 
         self.last_move = piece, tile
 
-
     def render(self):
         row_ids = [8,7,6,5,4,3,2,1]
         col_ids = ['A','B','C','D','E','F','G','H']
