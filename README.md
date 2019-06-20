@@ -2,8 +2,7 @@
 
 # TODO
 1. Pawn edge cases (promotion)
-2. End game conditions (checkmate, stalemate, draw, forfeit)
-3. Implement num defending
-4. Reward function
-5. Sample action
-6. Learning agent
+2. End game conditions (insufficient material, n-repitition, resignation)
+3. Reward function
+4. Sample action
+5. Learning agent

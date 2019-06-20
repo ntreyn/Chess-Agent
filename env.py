@@ -372,7 +372,19 @@ class chess_env:
 
     def num_defending(self, tile):
         # Number of friendly pieces defending square
-        pass
+        if self.player == 'W':
+            self.player = 'B'
+        else:
+            self.player = 'W'
+        
+        num_defenders = self.num_attacking(tile)
+
+        if self.player == 'W':
+            self.player = 'B'
+        else:
+            self.player = 'W'
+        
+        return num_defenders
 
     def get_moves(self):
         raw_moves = self.potential_moves()
