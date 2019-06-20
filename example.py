@@ -34,6 +34,8 @@ def main():
             else:
                 break
         
+        done, move_options, status = env.step(action)
+
         # End of turn
         if done:
             if status == 'W' or status == 'B':
