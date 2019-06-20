@@ -28,8 +28,6 @@ def main():
             move_options = env.get_moves()
             action = (piece.upper(), move.upper())
 
-            print(move_options)
-
             if action not in move_options:
                 print("Error: invalid action")
                 continue

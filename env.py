@@ -100,8 +100,6 @@ class chess_env:
                 self.white_remaining.remove(opp_piece)
                 self.white_lost.append(opp_piece)
             else:
-                print(piece)
-                print(tile)
                 self.black_remaining.remove(opp_piece)
                 self.black_lost.append(opp_piece)
 
@@ -367,13 +365,13 @@ class chess_env:
         return moves
 
     def check_moves(self, moves, king):
-        temp_board = self.board
-        temp_piece_locations = self.piece_locations
-        temp_white_remaining = self.white_remaining
-        temp_white_lost = self.white_lost
-        temp_black_remaining = self.black_remaining
-        temp_black_lost = self.black_lost
-        temp_last_move = self.last_move
+        temp_board = copy.deepcopy(self.board)
+        temp_piece_locations = copy.deepcopy(self.piece_locations)
+        temp_white_remaining = copy.deepcopy(self.white_remaining)
+        temp_white_lost = copy.deepcopy(self.white_lost)
+        temp_black_remaining = copy.deepcopy(self.black_remaining)
+        temp_black_lost = copy.deepcopy(self.black_lost)
+        temp_last_move = copy.deepcopy(self.last_move)
 
         valid_moves = []
 
@@ -383,17 +381,15 @@ class chess_env:
             check_count = self.num_attacking(king_tile)
 
             if check_count == 0:
-                print(piece)
-                print(tile)
                 valid_moves.append((piece, tile))
 
-            self.board = temp_board
-            self.piece_locations = temp_piece_locations
-            self.white_remaining = temp_white_remaining
-            self.white_lost = temp_white_lost
-            self.black_remaining = temp_black_remaining
-            self.black_lost = temp_black_lost
-            self.last_move = temp_last_move
+            self.board = copy.deepcopy(temp_board)
+            self.piece_locations = copy.deepcopy(temp_piece_locations)
+            self.white_remaining = copy.deepcopy(temp_white_remaining)
+            self.white_lost = copy.deepcopy(temp_white_lost)
+            self.black_remaining = copy.deepcopy(temp_black_remaining)
+            self.black_lost = copy.deepcopy(temp_black_lost)
+            self.last_move = copy.deepcopy(temp_last_move)
         
         return valid_moves
 
