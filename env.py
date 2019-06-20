@@ -253,6 +253,42 @@ class chess_env:
     def sample_action(self):
         return random.choice(self.get_moves())
 
+    def get_reward(self):
+    
+        """
+        Potential actions to reward:
+
+        Attacking pieces
+            -> Reward more for higher value pieces
+        Defending pieces
+            -> Reward more for higher value pieces
+        Capturing pieces
+            -> Reward more for higher value pieces
+
+        Board coverage (some sort of area function)
+        Attacking squares ???
+            -> Rewards bishop/rook/queen/knight coverage
+            -> Might tie into board coverage
+                -> Number of squares attacking?
+                -> Coverage function combining territory + squares attacking
+                    -> Territoy meaning board "behind" pieces
+
+        Checkmate
+        Castling
+
+        
+        Promoting pieces
+        
+        Pawn wall / pawn solidity???
+            -> Pawns arranged near king?
+
+        Penalize for opponent's reward
+
+
+        """
+
+        pass
+
     def set_piece_locations(self):
         self.piece_locations = {}
 
