@@ -83,12 +83,56 @@ class chess_env:
 
     def execute_move(self, piece, tile):
         r, c = tile
+        self.last_move_pawn_jump = False
 
-        if self.board[r][c] == 0:
+        if abs(piece) == 5 or abs(piece) == 1 or abs(piece) == 8:
+            if piece == 5:
+                self.kings_moved['W'] = True
+            elif piece == -5:
+                self.kings_moved['B'] = True
+            elif piece == 1:
+                self.rooks_moved['W'][0] = True
+            elif piece == 8:
+                self.rooks_moved['W'][1] = True
+            elif piece == -1:
+                self.rooks_moved['B'][0] = True
+            elif piece == -8:
+                self.rooks_moved['B'][1] = True
+            
+        # Castling edge case
+        if abs(piece) == 17:
+            if piece > 0:
+                # White
+                rook_mult = 1
+                king = 5
+            else:
+                # Black 
+                rook_mult = -1
+                king = -5
+
+            if c == 2:
+                # Queen's side
+                rook_tile = (r, c + 1)
+                rook = 1 * rook_mult
+            else:
+                # King's side
+                rook_tile = (r, c - 1)
+                rook = 8 * rook_mult
+
+            rook_or_r, rook_or_c = self.piece_locations[rook]
+            king_or_r, king_or_c = self.piece_locations[king]
+
+            self.board[rook_or_r][rook_or_c] = 0
+            self.board[king_or_r][king_or_c] = 0
+            self.piece_locations[king] = tile
+            self.piece_locations[rook] = rook_tile
+            self.board[r][c] = king
+            self.board[rook_tile[0]][rook_tile[1]] = rook
+
+        elif self.board[r][c] == 0:
             or_r, or_c = self.piece_locations[piece]
             abs_p = abs(piece)
-            self.last_move_pawn_jump = False
-
+            
             # En passant edge cases
             if abs_p >= 9 and abs_p <= 16:
                 # Set last_move_pawn_jump for en passant
@@ -334,10 +378,9 @@ class chess_env:
         for m in castle_moves:
             r, _ = m
             if r == 0:
-                mult = -1
+                p = -17
             else:
-                mult = 1
-            p = 17 * mult
+                p = 17
             moves.append((p, m))
 
         for p in pieces:
