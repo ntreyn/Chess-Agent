@@ -1,5 +1,6 @@
 import numpy as np 
 import copy
+import random
 
 class chess_env:
 
@@ -248,6 +249,9 @@ class chess_env:
             self.state_space[state] = self.state_count
             self.state_count += 1
             return self.state_space[state]
+
+    def sample_action(self):
+        return random.choice(self.get_moves())
 
     def set_piece_locations(self):
         self.piece_locations = {}

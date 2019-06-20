@@ -4,5 +4,4 @@
 1. Pawn edge cases (promotion)
 2. End game conditions (insufficient material, n-repitition, resignation)
 3. Reward function
-4. Sample action
-5. Learning agent
+4. Learning agent
