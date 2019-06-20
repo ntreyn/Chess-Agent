@@ -21,10 +21,6 @@ class chess_env:
         ' ': 0, 'C': 17, 'c': -17
     }
 
-    """
-    (+/-) 17 : Castle
-    """
-
     ids_to_pieces = {v: k for k, v in pieces_to_ids.items()}
 
     def __init__(self):
@@ -79,7 +75,29 @@ class chess_env:
         else:
             self.player = 'W'
 
-        return self.done
+        next_moves = self.get_moves()
+        status = 'P'
+
+        if not next_moves:
+            if self.player == 'W':
+                king_tile = self.piece_locations[5]
+            else:
+                king_tile = self.piece_locations[-5]
+
+            check_num = self.num_attacking(king_tile)
+            if check_num > 0:
+                # Checkmate
+                self.done = True
+                if self.player == 'W':
+                    status = 'B'
+                else:
+                    status = 'W'
+            else:
+                # Stalemate
+                self.done = True
+                status = 'D'
+
+        return self.done, next_moves, status
 
     def execute_move(self, piece, tile):
         r, c = tile
@@ -320,7 +338,7 @@ class chess_env:
         for p in pieces:
             abs_p = abs(p)
             if abs_p >= 9:
-                pawn_moves = self.pawn_actions(p)
+                pawn_moves = self.pawn_attacks(p)
                 for m in pawn_moves:
                     moves.append(m)
             elif abs_p == 1 or abs_p == 8:
@@ -463,8 +481,8 @@ class chess_env:
 
         if pawn > 0:
             not_last = row != 0
-            not_left_last = col != 0 and not_last
-            not_right_last = col != 7 and not_last
+            not_left = col != 0
+            not_right = col != 7
             
             if row == 6 and self.board[5][col] == 0 and self.board[4][col] == 0:
                 # Starting Double Move Forward
@@ -472,10 +490,10 @@ class chess_env:
             if not_last and self.board[row - 1][col] == 0:
                 # Single Move Forward
                 moves.append((row - 1, col))
-            if not_left_last and self.can_capture(pawn, self.board[row - 1][col - 1]):
+            if not_last and not_left and self.can_capture(pawn, self.board[row - 1][col - 1]):
                 # Diagonal capture left
                 moves.append((row - 1, col - 1))
-            if not_right_last and self.can_capture(pawn, self.board[row - 1][col + 1]):
+            if not_last and not_right and self.can_capture(pawn, self.board[row - 1][col + 1]):
                 # Diagonal capture right
                 moves.append((row - 1, col + 1))
             if self.last_move_pawn_jump:
@@ -491,8 +509,8 @@ class chess_env:
 
         elif pawn < 0:
             not_last = row != 7
-            not_left_last = col != 0 and not_last
-            not_right_last = col != 7 and not_last
+            not_left = col != 0
+            not_right = col != 7
             
             if row == 1 and self.board[2][col] == 0 and self.board[3][col] == 0:
                 # Starting Double Move Forward
@@ -500,10 +518,10 @@ class chess_env:
             if not_last and self.board[row + 1][col] == 0:
                 # Single Move Forward
                 moves.append((row + 1, col))
-            if not_left_last and self.can_capture(pawn, self.board[row + 1][col - 1]):
+            if not_last and not_left and self.can_capture(pawn, self.board[row + 1][col - 1]):
                 # Diagonal capture left
                 moves.append((row + 1, col - 1))
-            if not_right_last and self.can_capture(pawn, self.board[row + 1][col + 1]):
+            if not_last and not_right and self.can_capture(pawn, self.board[row + 1][col + 1]):
                 # Diagonal capture right
                 moves.append((row + 1, col + 1))
             if self.last_move_pawn_jump:
@@ -517,6 +535,52 @@ class chess_env:
                 # TODO
                 pass
         
+        else:
+            # Should never happen
+            pass
+
+        return moves
+
+    def pawn_attacks(self, pawn):
+        row, col = self.piece_locations[pawn]
+        moves = []
+
+        if pawn > 0:
+            not_last = row != 0
+            not_left = col != 0
+            not_right = col != 7
+
+            if not_last and not_left and self.can_capture(pawn, self.board[row - 1][col - 1]):
+                # Diagonal capture left
+                moves.append((row - 1, col - 1))
+            if not_last and not_right and self.can_capture(pawn, self.board[row - 1][col + 1]):
+                # Diagonal capture right
+                moves.append((row - 1, col + 1))
+            if self.last_move_pawn_jump:
+                lr, lc = self.last_move[1]
+                if lr == row:
+                    if lc + 1 == col or lc - 1 == col:
+                        # En Passant
+                        moves.append((row - 1, lc))
+
+        elif pawn < 0:
+            not_last = row != 7
+            not_left = col != 0
+            not_right = col != 7
+            
+            if not_last and not_left and self.can_capture(pawn, self.board[row + 1][col - 1]):
+                # Diagonal capture left
+                moves.append((row + 1, col - 1))
+            if not_last and not_right and self.can_capture(pawn, self.board[row + 1][col + 1]):
+                # Diagonal capture right
+                moves.append((row + 1, col + 1))
+            if self.last_move_pawn_jump:
+                lr, lc = self.last_move[1]
+                if lr == row:
+                    if lc + 1 == col or lc - 1 == col:
+                        # En Passant
+                        moves.append((row + 1, lc))
+ 
         else:
             # Should never happen
             pass

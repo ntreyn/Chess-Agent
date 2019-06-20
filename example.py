@@ -13,6 +13,7 @@ def main():
     }
     done = False
     turn = turn_map[env.player]
+    move_options = env.get_moves()
 
     while True:
         env.render()
@@ -25,7 +26,6 @@ def main():
                 if move != '':
                     break
 
-            move_options = env.get_moves()
             action = (piece.upper(), move.upper())
 
             if action not in move_options:
@@ -34,12 +34,13 @@ def main():
             else:
                 break
         
-        done = env.step(action)
-
-
-
         # End of turn
         if done:
+            if status == 'W' or status == 'B':
+                print("{} won!".format(turn_map[status]))
+            else:
+                print("Draw")
+            env.render()
             break
 
         turn = turn_map[env.player]
