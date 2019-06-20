@@ -86,6 +86,27 @@ class chess_env:
 
         if self.board[r][c] == 0:
             or_r, or_c = self.piece_locations[piece]
+            abs_p = abs(piece)
+            self.last_move_pawn_jump = False
+
+            # En passant edge cases
+            if abs_p >= 9 and abs_p <= 16:
+                # Set last_move_pawn_jump for en passant
+                if abs(or_r - r) == 2:
+                    self.last_move_pawn_jump = True
+                # Execute en passant
+                if or_c != c:
+                    # new column, old row
+                    opp_pawn = self.board[or_r][c]
+                    self.piece_locations[opp_pawn] = (-1, -1)
+                    self.board[or_r][c] = 0
+                    if opp_pawn > 0:
+                        self.white_remaining.remove(opp_pawn)
+                        self.white_lost.append(opp_pawn)
+                    else:
+                        self.black_remaining.remove(opp_pawn)
+                        self.black_lost.append(opp_pawn)
+            
             self.board[or_r][or_c] = 0
             self.piece_locations[piece] = tile
             self.board[r][c] = piece
