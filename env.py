@@ -16,7 +16,7 @@ class chess_env:
 
     def __init__(self):
         self.state_size = 13 ** 64
-        self.action_space = 64 * 27
+        self.action_size = 64 * 27
         self.state_count = 0
         self.state_space = {}
         self.reset()
@@ -391,6 +391,12 @@ class chess_env:
             piece = piece * -1
         return piece, (int(row), int(column))
 
+    def convert_action(self, action):
+        piece_id, (r, c) = self.action_to_move(action)
+        piece = self.ids_to_pieces[piece_id]
+        tile = self.coord_to_tile(r, c)
+        return piece, tile
+
     def set_piece_locations(self):
         self.piece_locations = {}
 
@@ -538,6 +544,11 @@ class chess_env:
             moves.append((piece.upper(), tile))
         
         return moves
+
+    def get_actions(self):
+        raw_moves = self.potential_moves()
+        actions = [self.move_to_action(p, c) for p, c in raw_moves]
+        return actions
 
     def potential_moves(self):
         if self.player == 'W':
