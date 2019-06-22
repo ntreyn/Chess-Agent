@@ -16,6 +16,7 @@ class chess_env:
 
     def __init__(self):
         self.state_size = 13 ** 64
+        self.action_space = 64 * 27
         self.state_count = 0
         self.state_space = {}
         self.reset()
@@ -59,6 +60,8 @@ class chess_env:
         self.white_promotion_id = 18
         self.black_promotion_id = -18
 
+        return self.get_state()
+
 
     def step(self, action):
         """
@@ -69,6 +72,9 @@ class chess_env:
         piece = self.correct_piece(action[0])
         piece = self.pieces_to_ids[piece]
         tile = self.tile_to_coord(action[1])
+
+        reward = self.get_reward(piece, tile)
+
         self.execute_move(piece, tile)
 
 
@@ -110,7 +116,7 @@ class chess_env:
             self.done = True
             status = 'D'
 
-        return self.done, next_moves, status
+        return state, reward, self.done, next_moves, status
 
     def execute_move(self, piece, tile):
         r, c = tile
@@ -336,7 +342,7 @@ class chess_env:
     def sample_action(self):
         return random.choice(self.get_moves())
 
-    def get_reward(self):
+    def get_reward(self, piece, tile):
     
         """
         Potential actions to reward:
@@ -370,7 +376,20 @@ class chess_env:
 
         """
 
-        pass
+        return 0
+
+    def move_to_action(self, piece, move):
+        r, c = move
+        return 64 * (abs(piece) - 1) + (r * 8 + c)
+
+    def action_to_move(self, action):
+        square = action % 64
+        column = square % 8
+        row = (square - column) // 8
+        piece = (action - square) // 64 + 1
+        if self.player == 'B':
+            piece = piece * -1
+        return piece, (int(row), int(column))
 
     def set_piece_locations(self):
         self.piece_locations = {}
