@@ -18,7 +18,6 @@ class chess_env:
         self.state_size = 13 ** 64
         self.state_count = 0
         self.state_space = {}
-        self.state_visited = {}
         self.reset()
         self.set_piece_locations()
     
@@ -44,6 +43,7 @@ class chess_env:
 
         self.ids_to_pieces = {v: k for k, v in self.pieces_to_ids.items()}
 
+        self.state_visited = {}
         self.done = False
         self.player = 'W'
         self.black_remaining = [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16]
@@ -460,7 +460,7 @@ class chess_env:
 
         for p in pieces:
             abs_p = abs(p)
-            if abs_p >= 9 or abs_p <= 16:
+            if abs_p >= 9 and abs_p <= 16:
                 pawn_moves = self.pawn_attacks(p)
                 for m in pawn_moves:
                     moves.append(m)
@@ -571,14 +571,9 @@ class chess_env:
         else:
             king = 5
 
-        king_tile = self.piece_locations[king]
-        check_count = self.num_attacking(king_tile)
+        valid_moves = self.check_moves(moves, king)
 
-        if check_count > 0:
-            valid_moves = self.check_moves(moves, king)
-            return valid_moves
-    
-        return moves
+        return valid_moves
 
     def check_moves(self, moves, king):
         temp_board = copy.deepcopy(self.board)
