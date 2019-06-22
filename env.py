@@ -14,16 +14,6 @@ class chess_env:
 	    ' ': ' '
     }
 
-    pieces_to_ids = {
-        'R1': 1, 'N1': 2, 'B1': 3, 'Q': 4, 'K': 5, 'B2': 6, 'N2': 7, 'R2': 8,
-        'P1': 9, 'P2': 10, 'P3': 11, 'P4': 12, 'P5': 13, 'P6': 14, 'P7': 15, 'P8': 16, 
-        'r1': -1, 'n1': -2, 'b1': -3, 'q': -4, 'k': -5, 'b2': -6, 'n2': -7, 'r2': -8,
-        'p1': -9, 'p2': -10, 'p3': -11, 'p4': -12, 'p5': -13, 'p6': -14, 'p7': -15, 'p8': -16, 
-        ' ': 0, 'C': 17, 'c': -17
-    }
-
-    ids_to_pieces = {v: k for k, v in pieces_to_ids.items()}
-
     def __init__(self):
         self.state_size = 13 ** 64
         self.state_count = 0
@@ -43,6 +33,17 @@ class chess_env:
             [9, 10, 11, 12, 13, 14, 15, 16],
             [1, 2, 3, 4, 5, 6, 7, 8]
         ]
+
+        self.pieces_to_ids = {
+            'R1': 1, 'N1': 2, 'B1': 3, 'Q': 4, 'K': 5, 'B2': 6, 'N2': 7, 'R2': 8,
+            'P1': 9, 'P2': 10, 'P3': 11, 'P4': 12, 'P5': 13, 'P6': 14, 'P7': 15, 'P8': 16, 
+            'r1': -1, 'n1': -2, 'b1': -3, 'q': -4, 'k': -5, 'b2': -6, 'n2': -7, 'r2': -8,
+            'p1': -9, 'p2': -10, 'p3': -11, 'p4': -12, 'p5': -13, 'p6': -14, 'p7': -15, 'p8': -16, 
+            ' ': 0, 'C': 17, 'c': -17
+        }
+
+        self.ids_to_pieces = {v: k for k, v in self.pieces_to_ids.items()}
+
         self.done = False
         self.player = 'W'
         self.black_remaining = [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16]
@@ -53,6 +54,11 @@ class chess_env:
         self.rooks_moved = { 'W': [False, False], 'B': [False, False] }
         self.last_move = (0, (-1, -1))
         self.last_move_pawn_jump = False
+        self.white_num_promotions = 1
+        self.black_num_promotions = 1
+        self.white_promotion_id = 18
+        self.black_promotion_id = -18
+
 
     def step(self, action):
         """
@@ -158,8 +164,42 @@ class chess_env:
             or_r, or_c = self.piece_locations[piece]
             abs_p = abs(piece)
             
-            # En passant edge cases
+            # Pawn edge cases
             if abs_p >= 9 and abs_p <= 16:
+
+                # Promotion edge case 
+                if piece > 0:
+                    last_row = 0
+                    letter = 'Q'
+                else:
+                    last_row = 7
+                    letter = 'q'
+                
+                if r == last_row:
+                    
+                    if piece > 0:
+                        piece_name = letter + str(self.white_num_promotions)
+                        piece_id = self.white_promotion_id
+                        self.white_remaining.append(piece_id)
+                        self.white_remaining.remove(piece)
+                        self.white_num_promotions += 1
+                        self.white_promotion_id += 1
+                    else:
+                        piece_name = letter + str(self.black_num_promotions)
+                        piece_id = self.black_promotion_id
+                        self.black_remaining.append(piece_id)
+                        self.black_remaining.remove(piece)
+                        self.black_num_promotions += 1
+                        self.black_promotion_id -= 1
+
+                    self.pieces_to_ids[piece_name] = piece_id
+                    self.ids_to_pieces[piece_id] = piece_name
+                    self.piece_locations[piece] = (-1, -1) 
+                    piece = piece_id
+                    
+                    print(piece)
+                    print(piece_name)
+
                 # Set last_move_pawn_jump for en passant
                 if abs(or_r - r) == 2:
                     self.last_move_pawn_jump = True
@@ -192,6 +232,40 @@ class chess_env:
             else:
                 self.black_remaining.remove(opp_piece)
                 self.black_lost.append(opp_piece)
+
+            # Promotion edge case
+            if abs(piece) >= 9 and abs(piece) <= 16:  
+                if piece > 0:
+                    last_row = 0
+                    letter = 'Q'
+                else:
+                    last_row = 7
+                    letter = 'q'
+                
+                if r == last_row:
+                    
+                    if piece > 0:
+                        piece_name = letter + str(self.white_num_promotions)
+                        piece_id = self.white_promotion_id
+                        self.white_remaining.append(piece_id)
+                        self.white_remaining.remove(piece)
+                        self.white_num_promotions += 1
+                        self.white_promotion_id += 1
+                    else:
+                        piece_name = letter + str(self.black_num_promotions)
+                        piece_id = self.black_promotion_id
+                        self.black_remaining.append(piece_id)
+                        self.black_remaining.remove(piece)
+                        self.black_num_promotions += 1
+                        self.black_promotion_id -= 1
+
+                    self.pieces_to_ids[piece_name] = piece_id
+                    self.ids_to_pieces[piece_id] = piece_name
+                    self.piece_locations[piece] = (-1, -1) 
+                    piece = piece_id
+                    
+                    print(piece)
+                    print(piece_name)
 
             self.piece_locations[piece] = tile
             self.board[r][c] = piece
@@ -386,7 +460,7 @@ class chess_env:
 
         for p in pieces:
             abs_p = abs(p)
-            if abs_p >= 9:
+            if abs_p >= 9 or abs_p <= 16:
                 pawn_moves = self.pawn_attacks(p)
                 for m in pawn_moves:
                     moves.append(m)
@@ -402,7 +476,7 @@ class chess_env:
                 bishop_moves = self.bishop_actions(p)
                 for m in bishop_moves:
                     moves.append(m)
-            elif abs_p == 4:
+            elif abs_p == 4 or abs_p >= 18:
                 queen_moves = self.queen_actions(p)
                 for m in queen_moves:
                     moves.append(m)
@@ -464,7 +538,7 @@ class chess_env:
 
         for p in pieces:
             abs_p = abs(p)
-            if abs_p >= 9:
+            if abs_p >= 9 and abs_p <= 16:
                 pawn_moves = self.pawn_actions(p)
                 for m in pawn_moves:
                     moves.append((p, m))
@@ -480,7 +554,7 @@ class chess_env:
                 bishop_moves = self.bishop_actions(p)
                 for m in bishop_moves:
                     moves.append((p, m))
-            elif abs_p == 4:
+            elif abs_p == 4 or abs_p >= 18:
                 queen_moves = self.queen_actions(p)
                 for m in queen_moves:
                     moves.append((p, m))
