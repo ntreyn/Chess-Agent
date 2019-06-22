@@ -28,6 +28,7 @@ class chess_env:
         self.state_size = 13 ** 64
         self.state_count = 0
         self.state_space = {}
+        self.state_visited = {}
         self.reset()
         self.set_piece_locations()
     
@@ -97,6 +98,11 @@ class chess_env:
                 # Stalemate
                 self.done = True
                 status = 'D'
+        
+        state = self.get_state()
+        if self.state_visited[state] >= 3 and status == 'P':
+            self.done = True
+            status = 'D'
 
         return self.done, next_moves, status
 
@@ -244,9 +250,12 @@ class chess_env:
         state = tuple(state_list), self.player
 
         if state in self.state_space:
-            return self.state_space[state]
+            temp_state = self.state_space[state]
+            self.state_visited[temp_state] += 1
+            return temp_state
         else:
             self.state_space[state] = self.state_count
+            self.state_visited[self.state_count] = 1
             self.state_count += 1
             return self.state_space[state]
 

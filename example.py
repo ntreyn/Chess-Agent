@@ -14,9 +14,12 @@ def main():
     done = False
     turn = turn_map[env.player]
     move_options = env.get_moves()
+    count = 0
 
     while True:
         env.render()
+        count += 1
+        print("Turn {}".format(count))
         
         print("{}, your turn".format(turn))
         while True:
