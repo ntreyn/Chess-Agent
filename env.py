@@ -175,7 +175,7 @@ class chess_env:
                     last_row = 7
                     letter = 'q'
                 
-                if r == last_row:
+                if r == last_row and not self.checking_no_promotion:
                     
                     if piece > 0:
                         piece_name = letter + str(self.white_num_promotions)
@@ -242,7 +242,7 @@ class chess_env:
                     last_row = 7
                     letter = 'q'
                 
-                if r == last_row:
+                if r == last_row and not self.checking_no_promotion:
                     
                     if piece > 0:
                         piece_name = letter + str(self.white_num_promotions)
@@ -585,6 +585,7 @@ class chess_env:
         temp_last_move = copy.deepcopy(self.last_move)
 
         valid_moves = []
+        self.checking_no_promotion = True
 
         for piece, tile in moves:
             self.execute_move(piece, tile)
@@ -602,6 +603,7 @@ class chess_env:
             self.black_lost = copy.deepcopy(temp_black_lost)
             self.last_move = copy.deepcopy(temp_last_move)
         
+        self.checking_no_promotion = False
         return valid_moves
 
     def pawn_actions(self, pawn):
